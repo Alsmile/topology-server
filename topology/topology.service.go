@@ -176,7 +176,7 @@ func history(data *Topology) {
 		log.Error().Caller().Err(err).Str("func", "topology.history").Msgf("Fail to write mongo: topoID=%s", data.ID)
 	}
 
-	log.Debug().Caller().Err(err).Str("func", "topology.history").Msgf("write mongo: topo=%v", data)
+	data.ID = data.FileID
 }
 
 // Favorites 收藏列表
