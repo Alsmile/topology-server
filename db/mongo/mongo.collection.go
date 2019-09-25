@@ -11,4 +11,7 @@ const (
 
 	// Stars 点赞表
 	Stars = "stars"
+
+	// Images 上传的图片列表
+	Images = "images"
 )

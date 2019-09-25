@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"topology/config"
+	"topology/images"
 	"topology/middlewares"
 	"topology/topology"
 	"topology/websocket"
@@ -21,6 +22,9 @@ func Listen() {
 
 	// 拓扑图模块
 	topology.Route(route)
+
+	// 用户图库模块
+	images.Route(route)
 
 	websocket.Route(route)
 
