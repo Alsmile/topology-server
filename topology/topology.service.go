@@ -80,6 +80,12 @@ func Save(data *Topology, uid, username string, isHistory bool) (err error) {
 		data.CreatedAt = data.UpdatedAt
 		data.UserID = uid
 		data.Username = username
+	} else {
+		src, err := GetTopologyByID(data.ID.Hex(), uid)
+		if err == nil {
+			data.Star = src.Star
+			data.Hot = src.Hot
+		}
 	}
 
 	_, err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).

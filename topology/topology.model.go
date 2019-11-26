@@ -26,7 +26,7 @@ type Topology struct {
 
 	Shared bool  `json:"shared"`
 	Star   uint8 `json:"star" bson:"star,omitempty"`
-	Hot    int   `json:"hot" bson:"hot,omitempty" `
+	Hot    uint8 `json:"hot" bson:"hot,omitempty" `
 
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt,omitempty"`
