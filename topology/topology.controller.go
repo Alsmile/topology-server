@@ -269,8 +269,6 @@ func UserTopologyAdd(ctx iris.Context) {
 	}
 
 	data.ID = ""
-	data.Star = 0
-	data.Hot = 0
 	vip := middlewares.Vip(ctx)
 	err = Save(data, ctx.Values().GetString("uid"), ctx.Values().GetString("username"), vip > 0)
 	if err != nil {
