@@ -49,7 +49,7 @@ func GetTopologies(where *bson.M, sort string, pageIndex, pageCount int, cnt boo
 		count, err = query.Select(bson.M{"_id": true}).Count()
 	}
 
-	query = query.Select(SelectFileds)
+	query = query.Select(bson.M{"data": false, "deletedAt": false})
 	if sort != "" {
 		query = query.Sort(sort)
 	}
