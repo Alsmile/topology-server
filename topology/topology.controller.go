@@ -143,26 +143,6 @@ func Topologies(ctx iris.Context) {
 
 	ret["list"] = list
 	ret["count"] = count
-
-	uid := ctx.Values().GetString("uid")
-	if uid != "" {
-		idList := make([]bson.ObjectId, count)
-		i := 0
-		for ; i < count; i++ {
-			idList[i] = list[i].ID
-		}
-
-		where := bson.M{
-			"_id":    bson.M{"$in": idList},
-			"userId": uid,
-		}
-
-		favorites, _, _ := Favorites(&where, pageIndex, pageCount)
-		ret["favorites"] = favorites
-
-		stars, _, _ := Stars(&where, pageIndex, pageCount)
-		ret["stars"] = stars
-	}
 }
 
 // UserTopologies 获取用户拓扑图
