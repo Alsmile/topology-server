@@ -11,7 +11,7 @@ type Topology struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 
 	// 历史记录用，表示源文件id
-	FileID bson.ObjectId `json:"fileId,omitempty" bson:"fileId,omitempty"`
+	Src bson.ObjectId `json:"src,omitempty" bson:"src,omitempty"`
 
 	Name  string `json:"name"`
 	Desc  string `json:"desc"`

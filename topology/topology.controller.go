@@ -20,15 +20,15 @@ func GetTopology(ctx iris.Context) {
 		return
 	}
 
-	fileID := ctx.URLParam("fileId")
-	if fileID != "" && !bson.IsObjectIdHex(fileID) {
+	version := ctx.URLParam("version")
+	if version != "" && !bson.IsObjectIdHex(version) {
 		ctx.JSON(bson.M{
 			"error": keys.ErrorID,
 		})
 		return
 	}
 
-	if fileID == "" {
+	if version == "" {
 		data, err := GetTopologyByID(id, ctx.Values().GetString("uid"))
 		if err != nil {
 			ctx.JSON(bson.M{
@@ -41,7 +41,7 @@ func GetTopology(ctx iris.Context) {
 		return
 	}
 
-	data, err := GetHistory(id, fileID, ctx.Values().GetString("uid"))
+	data, err := GetHistory(version, ctx.Values().GetString("uid"))
 	if err != nil {
 		ctx.JSON(bson.M{
 			"error":       keys.ErrorRead,
@@ -49,6 +49,7 @@ func GetTopology(ctx iris.Context) {
 		})
 		return
 	}
+	data.ID = data.Src
 	ctx.JSON(data)
 }
 
@@ -523,15 +524,15 @@ func UserStarDel(ctx iris.Context) {
 }
 
 // TopologyHistories 获取用户收藏拓扑图
-// [query] fileId - 根据文件ID查找该文件历史记录
+// [query] id - 根据文件ID查找该文件历史记录
 // [query] pageIndex - 当前第几页
 // [query] pageCount - 每页显示个数
 func TopologyHistories(ctx iris.Context) {
 	ret := make(map[string]interface{})
 	defer ctx.JSON(ret)
 
-	fileID := ctx.URLParam("fileId")
-	if fileID == "" || !bson.IsObjectIdHex(fileID) {
+	id := ctx.URLParam("id")
+	if id == "" || !bson.IsObjectIdHex(id) {
 		ret["error"] = keys.ErrorParam
 		return
 	}
@@ -547,7 +548,7 @@ func TopologyHistories(ctx iris.Context) {
 		return
 	}
 
-	list, count, err := Histories(fileID, ctx.Values().GetString("uid"), pageIndex, pageCount)
+	list, count, err := Histories(id, ctx.Values().GetString("uid"), pageIndex, pageCount)
 	if err != nil {
 		ret["error"] = keys.ErrorRead
 		ret["errorDetail"] = err.Error()

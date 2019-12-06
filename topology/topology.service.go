@@ -90,6 +90,7 @@ func Save(data *Topology, uid, username string, isHistory bool) (err error) {
 		}
 	}
 
+	data.Src = ""
 	_, err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).
 		Upsert(bson.M{"_id": data.ID}, data)
 
@@ -97,10 +98,12 @@ func Save(data *Topology, uid, username string, isHistory bool) (err error) {
 		log.Error().Caller().Err(err).Str("func", "topology.Save").Msgf("Fail to write mongo: data=%v", data)
 	}
 
+	id := data.ID
 	if isHistory {
 		history(data)
 	}
 
+	data.ID = id
 	return
 }
 
@@ -176,15 +179,13 @@ func history(data *Topology) {
 	mongoSession := mongo.Session.Clone()
 	defer mongoSession.Close()
 
-	data.FileID = data.ID
+	data.Src = data.ID
 	data.ID = bson.NewObjectId()
 	data.CreatedAt = data.UpdatedAt
 	err := mongoSession.DB(config.App.Mongo.Database).C(mongo.TopologieHistories).Insert(data)
 	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.history").Msgf("Fail to write mongo: topoID=%s", data.ID)
+		log.Error().Caller().Err(err).Str("func", "topology.history").Msgf("Fail to write mongo: src=%s", data.Src)
 	}
-
-	data.ID = data.FileID
 }
 
 // Favorites 收藏列表
@@ -336,8 +337,8 @@ func StarDel(id, uid string) (err error) {
 }
 
 // GetHistory 获取拓扑图的历史记录
-func GetHistory(id, fileID, uid string) (*Topology, error) {
-	if !bson.IsObjectIdHex(id) || !bson.IsObjectIdHex(fileID) {
+func GetHistory(id, uid string) (*Topology, error) {
+	if !bson.IsObjectIdHex(id) {
 		return nil, errors.New(keys.ErrorID)
 	}
 
@@ -346,12 +347,12 @@ func GetHistory(id, fileID, uid string) (*Topology, error) {
 
 	topology := new(Topology)
 	err := mongoSession.DB(config.App.Mongo.Database).C(mongo.TopologieHistories).
-		Find(bson.M{"_id": bson.ObjectIdHex(id), "fileId": bson.ObjectIdHex(fileID), "userId": uid}).
+		Find(bson.M{"_id": bson.ObjectIdHex(id), "userId": uid}).
 		Select(SelectFileds).One(&topology)
 
 	if err != nil {
 		log.Error().Caller().Err(err).Str("func", "topology.GetHistory").
-			Msgf("Fail to read mongo: id=%s, fileID=%s, uid=%s", id, fileID, uid)
+			Msgf("Fail to read mongo: id=%s,uid=%s", id, uid)
 	}
 
 	return topology, err
@@ -367,7 +368,7 @@ func Histories(topoID, uid string, pageIndex, pageCount int) (list []Topology, c
 	mongoSession := mongo.Session.Clone()
 	defer mongoSession.Close()
 
-	where := bson.M{"fileId": bson.ObjectIdHex(topoID), "userId": uid}
+	where := bson.M{"src": bson.ObjectIdHex(topoID), "userId": uid}
 	query := mongoSession.DB(config.App.Mongo.Database).C(mongo.TopologieHistories).Find(where)
 	count, err = query.Select(bson.M{"_id": true}).Count()
 
