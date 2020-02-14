@@ -17,6 +17,7 @@ type Topology struct {
 	Desc  string `json:"desc"`
 	Data  bson.M `json:"data"`
 	Image string `json:"image"`
+	Class string `json:"class"`
 
 	UserID   string `json:"userId" bson:"userId"`
 	Username string `json:"username" `
@@ -24,9 +25,12 @@ type Topology struct {
 	EditorID   string `json:"editorId"  bson:"editorId"`
 	EditorName string `json:"editorName" bson:"editorName"`
 
-	Shared bool  `json:"shared"`
-	Star   uint8 `json:"star" bson:"star,omitempty"`
-	Hot    uint8 `json:"hot" bson:"hot,omitempty" `
+	Shared    bool  `json:"shared"`
+	Star      uint8 `json:"star" bson:"star,omitempty"`
+	View      uint8 `json:"view" bson:"view,omitempty" `
+	Recommend uint8 `json:"recommend" bson:"recommend,omitempty" `
+
+	Tags []string `json:"tags"`
 
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt,omitempty"`

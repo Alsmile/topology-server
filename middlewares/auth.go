@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"topology/config"
@@ -99,4 +100,15 @@ func Vip(ctx iris.Context) uint8 {
 	}
 
 	return vip
+}
+
+// Operater 必须是运营人员
+func Operater(ctx iris.Context) {
+	if !strings.Contains(ctx.Values().GetString("role"), "operation") {
+		log.Warn().Str("Illegal access", ctx.Values().GetString("uid")).Msg("auth.Operater")
+
+		return
+	}
+
+	ctx.Next()
 }

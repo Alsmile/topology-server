@@ -81,12 +81,12 @@ func Save(data *Topology, uid, username string, isHistory bool) (err error) {
 		data.UserID = uid
 		data.Username = username
 		data.Star = 0
-		data.Hot = 0
+		data.View = 0
 	} else {
 		src, err := GetTopologyByID(data.ID.Hex(), uid)
 		if err == nil {
 			data.Star = src.Star
-			data.Hot = src.Hot
+			data.View = src.View
 		}
 	}
 

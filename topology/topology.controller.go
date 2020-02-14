@@ -85,9 +85,13 @@ func Topologies(ctx iris.Context) {
 		"shared":    true,
 		"deletedAt": bson.M{"$exists": false},
 	}
-	name := ctx.URLParam("name")
+	name := ctx.URLParam("q")
 	if name != "" {
 		where["name"] = bson.M{"$regex": name, "$options": "$i"}
+	}
+	c := ctx.URLParam("c")
+	if c != "" {
+		where["class"] = c
 	}
 	desc := ctx.URLParam("desc")
 	if desc != "" {
@@ -134,7 +138,7 @@ func Topologies(ctx iris.Context) {
 
 	sort := ctx.URLParam("sort")
 	if sort == "" {
-		sort = "-star"
+		sort = "-recommend"
 	}
 	list, count, err := GetTopologies(&where, sort, pageIndex, pageCount, ctx.URLParam("count") != "0")
 	if err != nil {
