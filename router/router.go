@@ -4,9 +4,11 @@ import (
 	"strconv"
 	"strings"
 
+	"topology/cms"
 	"topology/config"
 	"topology/images"
 	"topology/middlewares"
+	"topology/tool"
 	"topology/topology"
 	"topology/websocket"
 
@@ -20,11 +22,10 @@ func Listen() {
 
 	route.Use(middlewares.Usr)
 
-	// 拓扑图模块
 	topology.Route(route)
-
-	// 用户图库模块
 	images.Route(route)
+	cms.Route(route)
+	tool.Route(route)
 
 	websocket.Route(route)
 

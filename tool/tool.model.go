@@ -1,4 +1,4 @@
-package cms
+package tool
 
 import (
 	"time"
@@ -6,12 +6,20 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// Cms 系统配置字段数据结构
-type Cms struct {
+// Tool 左侧工具栏图标数据结构
+type Tool struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 
-	Type string `json:"type"  bson:"type"`
-	Data bson.M `json:"data" bson:"data"`
+	Name  string `json:"name"  bson:"name"`
+	Icon  string `json:"icon"  bson:"icon"`
+	Image string `json:"image"  bson:"image"`
+	Data  bson.M `json:"data" bson:"data"`
+
+	Class string `json:"class"  bson:"class"`
+
+	Shared   bool   `json:"shared"`
+	UserID   string `json:"userId"  bson:"userId"`
+	UserName string `json:"userName"  bson:"userName"`
 
 	EditorID   string `json:"editorId"  bson:"editorId"`
 	EditorName string `json:"editorName" bson:"editorName"`

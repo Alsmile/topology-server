@@ -29,8 +29,9 @@ func List(where *bson.M, pageIndex, pageCount int, cnt bool) (list []Cms, count 
 	if pageIndex > 0 && pageCount > 0 {
 		err = query.Skip((pageIndex - 1) * pageCount).Limit(pageCount).
 			All(&list)
+	} else {
+		err = query.All(&list)
 	}
-
 	if err != nil {
 		log.Error().Caller().Err(err).Str("func", "cms.list").Msgf("Fail to read mongo: where=%v", where)
 	}

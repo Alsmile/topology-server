@@ -15,6 +15,9 @@ const (
 	// Images 上传的图片列表
 	Images = "images"
 
-	// Cms 字段数据表
-	Cms = "Cms"
+	// Cms 系统配置
+	Cms = "cms"
+
+	// Tool 左侧工具栏图标库
+	Tool = "tool"
 )

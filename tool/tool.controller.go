@@ -1,21 +1,26 @@
-package cms
+package tool
 
 import (
-	"strings"
 	"topology/keys"
 
 	"github.com/kataras/iris"
 	"gopkg.in/mgo.v2/bson"
 )
 
-// CmsGet 获取指定配置内容
-func CmsGet(ctx iris.Context) {
-	types := ctx.URLParam("types")
-	data, _, err := List(&bson.M{
-		"type": bson.M{
-			"$in": strings.Split(types, ","),
-		},
-	}, 0, 0, false)
+// ToolGet 获取用户工具图标列表
+func ToolGet(ctx iris.Context) {
+	isOperate := ctx.Values().GetBoolDefault("operate", false)
+	params := bson.M{}
+	if isOperate {
+		params["shared"] = true
+	} else {
+		params["$or"] = []bson.M{
+			bson.M{"userId": ctx.Values().GetString("uid")},
+			bson.M{"shared": true},
+		}
+	}
+
+	data, _, err := List(&params, 0, 0, false)
 	if err != nil {
 		ctx.JSON(bson.M{
 			"error":       keys.ErrorRead,
@@ -26,12 +31,12 @@ func CmsGet(ctx iris.Context) {
 	ctx.JSON(data)
 }
 
-// CmsAdd 新增配置内容
-func CmsAdd(ctx iris.Context) {
+// ToolAdd 新增
+func ToolAdd(ctx iris.Context) {
 	ret := make(map[string]interface{})
 	defer ctx.JSON(ret)
 
-	data := &Cms{}
+	data := &Tool{}
 	err := ctx.ReadJSON(data)
 	if err != nil {
 		ret["error"] = keys.ErrorParam
@@ -40,7 +45,7 @@ func CmsAdd(ctx iris.Context) {
 	}
 
 	data.ID = ""
-	err = Save(data, ctx.Values().GetString("uid"), ctx.Values().GetString("username"))
+	err = Save(data, ctx.Values().GetString("uid"), ctx.Values().GetString("username"), ctx.Values().GetBoolDefault("operate", false))
 	if err != nil {
 		ret["error"] = keys.ErrorSave
 		ret["errorDetail"] = err.Error()
@@ -49,12 +54,12 @@ func CmsAdd(ctx iris.Context) {
 	ret["id"] = data.ID
 }
 
-// CmsSave 保存修改
-func CmsSave(ctx iris.Context) {
+// ToolSave 修改
+func ToolSave(ctx iris.Context) {
 	ret := make(map[string]interface{})
 	defer ctx.JSON(ret)
 
-	data := &Cms{}
+	data := &Tool{}
 	err := ctx.ReadJSON(data)
 	if err != nil || data.ID == "" {
 		ret["error"] = keys.ErrorParam
@@ -64,7 +69,7 @@ func CmsSave(ctx iris.Context) {
 		return
 	}
 
-	err = Save(data, ctx.Values().GetString("uid"), ctx.Values().GetString("username"))
+	err = Save(data, ctx.Values().GetString("uid"), ctx.Values().GetString("username"), ctx.Values().GetBoolDefault("operate", false))
 	if err != nil {
 		ret["error"] = keys.ErrorSave
 		ret["errorDetail"] = err.Error()
@@ -72,8 +77,8 @@ func CmsSave(ctx iris.Context) {
 	ret["id"] = data.ID
 }
 
-// CmsDel 删除
-func CmsDel(ctx iris.Context) {
+// ToolDel 删除
+func ToolDel(ctx iris.Context) {
 	ret := make(map[string]interface{})
 	defer ctx.JSON(ret)
 
@@ -82,7 +87,7 @@ func CmsDel(ctx iris.Context) {
 		ret["error"] = keys.ErrorID
 		return
 	}
-	err := Del(id, ctx.Values().GetString("uid"), ctx.Values().GetString("username"))
+	err := Del(id, ctx.Values().GetString("uid"), ctx.Values().GetString("username"), ctx.Values().GetBoolDefault("operate", false))
 	if err != nil {
 		ret["error"] = keys.ErrorPermission
 	}

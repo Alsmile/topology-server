@@ -8,7 +8,7 @@ import (
 
 // Route file模块路由
 func Route(route *iris.Application) {
-	route.Get("/cms/:id", CmsGet)
+	route.Get("/api/cms", CmsGet)
 
 	routeUser := route.Party("/api/operate", middlewares.Auth, middlewares.Operater)
 	routeUser.Post("/cms", CmsAdd)
