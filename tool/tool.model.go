@@ -10,12 +10,13 @@ import (
 type Tool struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 
-	Name  string `json:"name"  bson:"name"`
-	Icon  string `json:"icon"  bson:"icon"`
-	Image string `json:"image"  bson:"image"`
-	Data  bson.M `json:"data" bson:"data"`
+	Name  string `json:"name"`
+	Icon  string `json:"icon"`
+	Image string `json:"image,omitempty"  bson:"image,omitempty"`
+	Data  bson.M `json:"data"`
 
-	Class string `json:"class"  bson:"class"`
+	Class string `json:"class"`
+	Sort  string `json:"sort"`
 
 	Shared   bool   `json:"shared"`
 	UserID   string `json:"userId"  bson:"userId"`

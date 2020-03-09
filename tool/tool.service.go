@@ -20,7 +20,7 @@ func List(where *bson.M, pageIndex, pageCount int, cnt bool) (list []Tool, count
 	mongoSession := mongo.Session.Clone()
 	defer mongoSession.Close()
 
-	query := mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).Find(where)
+	query := mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).Find(where).Sort("sort")
 
 	if cnt {
 		count, err = query.Select(bson.M{"_id": true}).Count()

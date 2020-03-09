@@ -19,5 +19,5 @@ const (
 	Cms = "cms"
 
 	// Tool 左侧工具栏图标库
-	Tool = "tool"
+	Tool = "tools"
 )
