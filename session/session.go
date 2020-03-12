@@ -3,7 +3,7 @@ package session
 import (
 	"net/http"
 
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 	"topology/db/redis"
 	"topology/utils"
 )

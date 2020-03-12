@@ -1,43 +1,38 @@
 module topology
 
-go 1.12
+go 1.14
 
 require (
-	github.com/Joker/jade v1.0.0 // indirect
-	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
-	github.com/aymerick/raymond v2.0.2+incompatible // indirect
+	github.com/ajg/form v1.5.1 // indirect
 	github.com/dchest/captcha v0.0.0-20170622155422-6a29415a8364
-	github.com/ddliu/go-httpclient v0.6.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
-	github.com/flosch/pongo2 v0.0.0-20190505152737-8914e1cf9164 // indirect
+	github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072 // indirect
 	github.com/garyburd/redigo v1.6.0
-	github.com/google/go-github v17.0.0+incompatible
+	github.com/go-check/check v1.0.0-20180628173108-788fd7840127 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/gorilla/websocket v1.4.0 // indirect
-	github.com/iris-contrib/blackfriday v2.0.0+incompatible // indirect
-	github.com/iris-contrib/formBinder v0.0.0-20190104093907-fbd5963f41e1 // indirect
-	github.com/iris-contrib/go.uuid v2.0.0+incompatible // indirect
-	github.com/json-iterator/go v1.1.6 // indirect
-	github.com/kataras/golog v0.0.0-20180321173939-03be10146386 // indirect
-	github.com/kataras/iris v11.1.1+incompatible
-	github.com/kataras/pio v0.0.0-20190103105442-ea782b38602d // indirect
-	github.com/klauspost/compress v1.7.0 // indirect
-	github.com/klauspost/cpuid v1.2.1 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
+	github.com/imkira/go-interpol v1.1.0 // indirect
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
+	github.com/kataras/iris/v12 v12.1.8
+	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/moul/http2curl v1.0.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.1.4 // indirect
+	github.com/onsi/ginkgo v1.12.0 // indirect
+	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/rs/zerolog v1.14.3
-	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
+	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
-	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	github.com/smartystreets/goconvey v1.6.4 // indirect
+	github.com/valyala/fasthttp v1.9.0 // indirect
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
+	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
+	github.com/yudai/gojsondiff v1.0.0 // indirect
+	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
+	github.com/yudai/pp v2.0.1+incompatible // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.4
 )
 
 replace (

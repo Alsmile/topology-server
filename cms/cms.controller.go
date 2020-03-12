@@ -4,7 +4,7 @@ import (
 	"strings"
 	"topology/keys"
 
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 	"gopkg.in/mgo.v2/bson"
 )
 

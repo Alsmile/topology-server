@@ -3,7 +3,7 @@ package cms
 import (
 	"topology/middlewares"
 
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
 // Route file模块路由

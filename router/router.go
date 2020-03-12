@@ -12,7 +12,7 @@ import (
 	"topology/topology"
 	"topology/websocket"
 
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
 // Listen 监听路由
@@ -29,17 +29,14 @@ func Listen() {
 
 	websocket.Route(route)
 
-	route.StaticWeb("/", "../web")
+	route.HandleDir("/", "../web")
+
+	// p := pprof.New()
+	// route.Any("/debug/pprof", p)
+	// route.Any("/debug/pprof/{action:path}", p)
 
 	// 监听
-	port := strconv.Itoa(int(config.App.Port))
-	route.Run(
-		iris.Addr(":"+port),
-		// skip err server closed when CTRL/CMD+C pressed:
-		iris.WithoutServerError(iris.ErrServerClosed),
-		// enables faster json serialization and more:
-		iris.WithOptimizations,
-	)
+	route.Listen(":" + strconv.Itoa(int(config.App.Port)))
 }
 
 // Index 首页静态文件

@@ -4,46 +4,40 @@ import (
 	"encoding/json"
 	"topology/middlewares"
 
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/websocket"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/websocket"
 	"github.com/rs/zerolog/log"
 )
 
 // Route Setup websocket.
 func Route(app *iris.Application) {
 	// create our echo websocket server
-	ws := websocket.New(websocket.Config{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+	ws := websocket.New(websocket.DefaultGorillaUpgrader, websocket.Events{
+		websocket.OnNativeMessage: OnMessage,
 	})
-	ws.OnConnection(wsConnection)
 
 	// register the server on an endpoint.
 	// see the inline javascript code in the websockets.html,
 	// this endpoint is used to connect to the server.
-	app.Get("/ws", ws.Handler())
+	app.Get("/ws", websocket.Handler(ws))
 }
 
-func wsConnection(conn websocket.Connection) {
-	conn.OnMessage(func(data []byte) {
-		var msg WsMsg
-		err := json.Unmarshal(data, &msg)
-		if err != nil {
-			log.Error().Caller().Err(err).Msgf("Error on wsConnection: %s", string(data))
-			return
-		}
-		switch msg.Event {
-		case "token":
-			middlewares.ParseJwt(conn.Context(), msg.Data)
-		}
+// OnMessage websocket 消息处理函数
+func OnMessage(nsConn *websocket.NSConn, msg websocket.Message) error {
+	ctx := websocket.GetContext(nsConn.Conn)
 
-		log.Debug().Caller().Msgf("Websocket OnMessage: userId=%s, data=%s", conn.Context().Values().GetString("uid"), string(data))
-	})
-
-	info := make(map[string]string)
-	info["remoteAddr"] = conn.Context().RemoteAddr()
-	jsonStr, err := json.Marshal(info)
-	if err == nil {
-		conn.EmitMessage([]byte(jsonStr))
+	var wsMsg WsMsg
+	err := json.Unmarshal(msg.Body, &wsMsg)
+	if err != nil {
+		log.Error().Caller().Err(err).Msgf("Error on wsConnection: %s", msg.Body)
+		return nil
 	}
+	switch msg.Event {
+	case "token":
+		middlewares.ParseJwt(ctx, wsMsg.Data)
+	}
+
+	log.Debug().Caller().Msgf("Websocket OnMessage: userId=%s, data=%s", ctx.Values().GetString("uid"), msg.Body)
+
+	return nil
 }
