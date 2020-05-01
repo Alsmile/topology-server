@@ -28,6 +28,10 @@ func GetTopology(ctx iris.Context) {
 		return
 	}
 
+	view := ctx.URLParam("view")
+	if view != "" {
+		View(id)
+	}
 	if version == "" {
 		data, err := GetTopologyByID(id, ctx.Values().GetString("uid"))
 		if err != nil {
@@ -61,6 +65,7 @@ func GetTopology(ctx iris.Context) {
 // [query] desc - 搜索desc
 // [query] text - 搜索name和desc
 // [query] user - 搜索username
+// [query] component - 是否是自定义组件，all - 查询所有类型；空 - 图文；非空 - 组件
 // [query] createdStart
 // [query] createdEnd
 // [query] updatedStart
@@ -93,6 +98,16 @@ func Topologies(ctx iris.Context) {
 	if c != "" {
 		where["class"] = c
 	}
+	component := ctx.URLParam("component")
+
+	if component != "all" {
+		if component == "" {
+			where["component"] = false
+		} else {
+			where["component"] = true
+		}
+	}
+
 	desc := ctx.URLParam("desc")
 	if desc != "" {
 		where["desc"] = bson.M{"$regex": desc, "$options": "$i"}
@@ -154,6 +169,7 @@ func Topologies(ctx iris.Context) {
 // [query] pageIndex - 当前第几页
 // [query] pageCount - 每页显示个数
 // [query] count - 0，表示不统计总数，返回count为0
+// [query] component - 是否获取用户自定义组件列表
 // [query] name - 搜索name
 // [query] desc - 搜索desc
 // [query] text - 搜索name和desc
@@ -184,6 +200,14 @@ func UserTopologies(ctx iris.Context) {
 		"deletedAt": bson.M{"$exists": deleted != ""},
 	}
 
+	component := ctx.URLParam("component")
+	if component != "all" {
+		if component == "" {
+			where["component"] = false
+		} else {
+			where["component"] = true
+		}
+	}
 	name := ctx.URLParam("name")
 	if name != "" {
 		where["name"] = bson.M{"$regex": name, "$options": "$i"}
@@ -346,98 +370,6 @@ func UserTopologyRestore(ctx iris.Context) {
 	}
 }
 
-// UserFavorites 获取用户收藏拓扑图
-// [query] pageIndex - 当前第几页
-// [query] pageCount - 每页显示个数
-func UserFavorites(ctx iris.Context) {
-	ret := make(map[string]interface{})
-	defer ctx.JSON(ret)
-
-	pageIndex, err := ctx.URLParamInt(keys.PageIndex)
-	if err != nil {
-		ret["error"] = keys.ErrorParamPage
-		return
-	}
-	pageCount, err := ctx.URLParamInt(keys.PageCount)
-	if err != nil {
-		ret["error"] = keys.ErrorParamPage
-		return
-	}
-
-	uid := ctx.Values().GetString("uid")
-	ids, count, err := Favorites(&bson.M{"userId": uid}, pageIndex, pageCount)
-	if err != nil {
-		ret["error"] = keys.ErrorRead
-		ret["errorDetail"] = err.Error()
-		return
-	}
-
-	idList := make([]bson.ObjectId, count)
-	i := 0
-	for ; i < count; i++ {
-		idList[i] = ids[i].ID
-	}
-
-	where := bson.M{
-		"_id":    bson.M{"$in": idList},
-		"userId": uid,
-	}
-	list, count, err := GetTopologies(&where, "", pageIndex, pageCount, ctx.URLParam("count") != "0")
-	if err != nil {
-		ret["warning"] = "您已收藏"
-		ret["errorDetail"] = err.Error()
-	}
-
-	ret["list"] = list
-	ret["count"] = count
-
-	stars, _, _ := Stars(&where, pageIndex, pageCount)
-	ret["stars"] = stars
-}
-
-// UserFavoriteAdd 收藏
-func UserFavoriteAdd(ctx iris.Context) {
-	ret := make(map[string]interface{})
-	defer ctx.JSON(ret)
-
-	data := &Favorite{}
-	err := ctx.ReadJSON(data)
-	if err != nil {
-		ret["error"] = keys.ErrorParam
-		ret["errorDetail"] = err.Error()
-		return
-	}
-
-	if data.ID == "" {
-		ret["error"] = keys.ErrorID
-		return
-	}
-
-	err = FavoriteAdd(data, ctx.Values().GetString("uid"))
-	if err != nil {
-		ret["error"] = keys.ErrorSave
-		ret["errorDetail"] = err.Error()
-	}
-}
-
-// UserFavoriteDel 取消收藏
-func UserFavoriteDel(ctx iris.Context) {
-	ret := make(map[string]interface{})
-	defer ctx.JSON(ret)
-
-	id := ctx.Params().Get("id")
-	if !bson.IsObjectIdHex(id) {
-		ret["error"] = keys.ErrorID
-		return
-	}
-
-	err := FavoriteDel(id, ctx.Values().GetString("uid"))
-	if err != nil {
-		ret["error"] = keys.ErrorSave
-		ret["errorDetail"] = err.Error()
-	}
-}
-
 // UserStars 获取用户点赞列表
 // [query] pageIndex - 当前第几页
 // [query] pageCount - 每页显示个数
@@ -482,6 +414,36 @@ func UserStars(ctx iris.Context) {
 
 	ret["list"] = list
 	ret["count"] = count
+}
+
+// UserStarIDs 通过条件查询用户点赞id列表
+// [body] ids - id数组。查询改数组中有哪些被用户star
+func UserStarIDs(ctx iris.Context) {
+	ret := make(map[string]interface{})
+	defer ctx.JSON(ret)
+
+	data := struct {
+		IDs []string
+	}{}
+	err := ctx.ReadJSON(&data)
+	if err != nil {
+		ret["error"] = keys.ErrorParam
+		ret["errorDetail"] = err.Error()
+	}
+
+	count := len(data.IDs)
+	idList := make([]bson.ObjectId, count)
+	i := 0
+	for ; i < count; i++ {
+		idList[i] = bson.ObjectIdHex(data.IDs[i])
+	}
+
+	list, _ := StarIds(&bson.M{
+		"userId": ctx.Values().GetString("uid"),
+		"_id":    bson.M{"$in": idList},
+	})
+
+	ret["list"] = list
 }
 
 // UserStarAdd 点赞
@@ -604,4 +566,10 @@ func TopologyHistoryDel(ctx iris.Context) {
 		ret["error"] = keys.ErrorSave
 		ret["errorDetail"] = err.Error()
 	}
+}
+
+// UserStatistics 统计
+func UserStatistics(ctx iris.Context) {
+	count, _ := Statistics(ctx.Values().GetString("uid"))
+	ctx.JSON(count)
 }

@@ -13,11 +13,13 @@ type Topology struct {
 	// 历史记录用，表示源文件id
 	Src bson.ObjectId `json:"src,omitempty" bson:"src,omitempty"`
 
-	Name  string `json:"name"`
-	Desc  string `json:"desc"`
-	Data  bson.M `json:"data"`
-	Image string `json:"image"`
-	Class string `json:"class"`
+	Name          string `json:"name"`
+	Desc          string `json:"desc"`
+	Data          bson.M `json:"data"`
+	Image         string `json:"image"`
+	Class         string `json:"class"`
+	Component     bool   `json:"component"`
+	ComponentData bson.M `json:"componentData,omitempty"  bson:"componentData,omitempty"`
 
 	UserID   string `json:"userId" bson:"userId"`
 	Username string `json:"username" `

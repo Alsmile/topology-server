@@ -18,6 +18,7 @@ type Tool struct {
 	Class string `json:"class"`
 	Sort  string `json:"sort"`
 
+	Raw      bool   `json:"raw"`
 	Shared   bool   `json:"shared"`
 	UserID   string `json:"userId"  bson:"userId"`
 	UserName string `json:"userName"  bson:"userName"`

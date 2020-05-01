@@ -6,13 +6,13 @@ jwt: IKJfd345shJhdf
 secret: le5le-HJdfhs
 mongo:
   address: 127.0.0.1:27017
-  database: le5leTopology
+  database: topology
   #user: xxxx
   #password: xxxx
   maxConnections: 10
   Timeout: 30
   logLevel: 1
-  mechanism: SCRAM-SHA-1
+  mechanism: SCRAM-SHA-256
   debug: false
 redis:
   maxConnections: 10

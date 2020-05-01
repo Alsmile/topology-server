@@ -38,6 +38,24 @@ func GetTopologyByID(topoID, uid string) (*Topology, error) {
 	return topology, err
 }
 
+// View 浏览数+1
+func View(topoID string) error {
+	if !bson.IsObjectIdHex(topoID) {
+		return errors.New(keys.ErrorID)
+	}
+
+	mongoSession := mongo.Session.Clone()
+	defer mongoSession.Close()
+
+	err := mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).
+		UpdateId(bson.ObjectIdHex(topoID), bson.M{"$inc": bson.M{"view": 1}})
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "topology.View.Inc").Msgf("Fail to write mongo(Topologies): topoID=%v", topoID)
+	}
+
+	return err
+}
+
 // GetTopologies 通过查询条件获取拓扑图
 func GetTopologies(where *bson.M, sort string, pageIndex, pageCount int, cnt bool) (list []Topology, count int, err error) {
 	mongoSession := mongo.Session.Clone()
@@ -188,80 +206,6 @@ func history(data *Topology) {
 	}
 }
 
-// Favorites 收藏列表
-func Favorites(where *bson.M, pageIndex, pageCount int) (list []Favorite, count int, err error) {
-	mongoSession := mongo.Session.Clone()
-	defer mongoSession.Close()
-
-	query := mongoSession.DB(config.App.Mongo.Database).C(mongo.Favorites).Find(where)
-
-	count, err = query.Select(bson.M{"_id": true}).Count()
-
-	query = query.Sort("-createdAt")
-	if pageIndex > 0 && pageCount > 0 {
-		err = query.Skip((pageIndex - 1) * pageCount).Limit(pageCount).
-			All(&list)
-	}
-
-	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.Favorites").Msgf("Fail to read mongo: where=%v", where)
-	}
-
-	return
-}
-
-// FavoriteAdd 收藏
-func FavoriteAdd(data *Favorite, uid string) (err error) {
-	if data.ID == "" {
-		err = errors.New(keys.ErrorID)
-		return
-	}
-
-	mongoSession := mongo.Session.Clone()
-	defer mongoSession.Close()
-
-	data.CreatedAt = time.Now().UTC()
-	data.UserID = uid
-	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Favorites).Insert(data)
-	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.FavoriteAdd.Insert").Msgf("Fail to write mongo(Favorites): data=%v", data)
-		return
-	}
-
-	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).
-		UpdateId(data.ID, bson.M{"$inc": bson.M{"hot": 1}})
-	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.FavoriteAdd.Inc").Msgf("Fail to write mongo(Topologies): data=%v", data)
-	}
-
-	return
-}
-
-// FavoriteDel 取消收藏
-func FavoriteDel(id, uid string) (err error) {
-	if !bson.IsObjectIdHex(id) {
-		err = errors.New(keys.ErrorID)
-		return
-	}
-
-	mongoSession := mongo.Session.Clone()
-	defer mongoSession.Close()
-
-	_id := bson.ObjectIdHex(id)
-	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Favorites).Remove(bson.M{"_id": _id, "userId": uid})
-	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.FavoriteDel").Msgf("Fail to write mongo(Favorites): data=%v", _id)
-		return
-	}
-
-	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).UpdateId(_id, bson.M{"$inc": bson.M{"hot": -1}})
-	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "topology.FavoriteDel").Msgf("Fail to write mongo(Topologies): data=%v", _id)
-	}
-
-	return
-}
-
 // Stars 点赞列表
 func Stars(where *bson.M, pageIndex, pageCount int) (list []Star, count int, err error) {
 	mongoSession := mongo.Session.Clone()
@@ -279,6 +223,20 @@ func Stars(where *bson.M, pageIndex, pageCount int) (list []Star, count int, err
 
 	if err != nil {
 		log.Error().Caller().Err(err).Str("func", "topology.Stars").Msgf("Fail to read mongo: where=%v", where)
+	}
+
+	return
+}
+
+// StarIds 通过条件查询用户点赞id列表
+func StarIds(where *bson.M) (list []Star, err error) {
+	mongoSession := mongo.Session.Clone()
+	defer mongoSession.Close()
+
+	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Stars).Find(where).
+		Select(bson.M{"_id": true}).All(&list)
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "topology.StarIds").Msgf("Fail to read mongo: where=%v", where)
 	}
 
 	return
@@ -430,4 +388,27 @@ func HistoryDel(id, uid string) (err error) {
 	}
 
 	return
+}
+
+// Statistics 统计数据
+func Statistics(uid string) (bson.M, error) {
+	mongoSession := mongo.Session.Clone()
+	defer mongoSession.Close()
+
+	topoCount, err := mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).
+		Find(bson.M{"userId": uid, "component": false}).
+		Select(bson.M{"_id": true}).Count()
+
+	componentCount, err := mongoSession.DB(config.App.Mongo.Database).C(mongo.Topologies).
+		Find(bson.M{"userId": uid, "component": true}).
+		Select(bson.M{"_id": true}).Count()
+
+	starCount, err := mongoSession.DB(config.App.Mongo.Database).C(mongo.Stars).
+		Find(bson.M{"userId": uid}).Select(bson.M{"_id": true}).Count()
+
+	return bson.M{
+		"topology":  topoCount,
+		"component": componentCount,
+		"star":      starCount,
+	}, err
 }

@@ -19,10 +19,6 @@ func Route(route *iris.Application) {
 	routeUser.Delete("/topology/:id", UserTopologyDel)
 	routeUser.Post("/topology/restore/:id", UserTopologyRestore)
 
-	routeUser.Get("/favorites", UserFavorites)
-	routeUser.Post("/favorite", UserFavoriteAdd)
-	routeUser.Delete("/favorite/:id", UserFavoriteDel)
-
 	routeUser.Get("/topology/histories", TopologyHistories)
 	routeUser.Patch("/topology/history", TopologyHistoryPatch)
 	routeUser.Delete("/topology/history/:id", TopologyHistoryDel)
@@ -30,4 +26,7 @@ func Route(route *iris.Application) {
 	routeUser.Get("/stars", UserStars)
 	routeUser.Post("/star", UserStarAdd)
 	routeUser.Delete("/star/:id", UserStarDel)
+	routeUser.Post("/star/ids", UserStarIDs)
+
+	routeUser.Get("/statistics", UserStatistics)
 }

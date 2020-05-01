@@ -10,14 +10,9 @@ import (
 // ToolGet 获取用户工具图标列表
 func ToolGet(ctx iris.Context) {
 	isOperate := ctx.Values().GetBoolDefault("operate", false)
-	params := bson.M{}
+	params := bson.M{"shared": true}
 	if isOperate {
-		params["shared"] = true
-	} else {
-		params["$or"] = []bson.M{
-			bson.M{"userId": ctx.Values().GetString("uid")},
-			bson.M{"shared": true},
-		}
+		params = bson.M{}
 	}
 
 	data, _, err := List(&params, 0, 0, false)
