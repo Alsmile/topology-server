@@ -396,6 +396,7 @@ func UserStars(ctx iris.Context) {
 		return
 	}
 
+	count = len(ids)
 	idList := make([]bson.ObjectId, count)
 	i := 0
 	for ; i < count; i++ {
