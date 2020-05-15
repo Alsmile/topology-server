@@ -27,10 +27,10 @@ type Topology struct {
 	EditorID   string `json:"editorId"  bson:"editorId"`
 	EditorName string `json:"editorName" bson:"editorName"`
 
-	Shared    bool  `json:"shared"`
-	Star      uint8 `json:"star" bson:"star,omitempty"`
-	View      uint8 `json:"view" bson:"view,omitempty" `
-	Recommend uint8 `json:"recommend" bson:"recommend,omitempty" `
+	Shared    bool `json:"shared"`
+	Star      uint `json:"star" bson:"star,omitempty"`
+	View      uint `json:"view" bson:"view,omitempty" `
+	Recommend uint `json:"recommend" bson:"recommend,omitempty" `
 
 	Tags []string `json:"tags"`
 
