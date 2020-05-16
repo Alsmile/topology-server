@@ -98,13 +98,16 @@ func Save(data *Topology, uid, username string, isHistory bool) (err error) {
 		data.CreatedAt = data.UpdatedAt
 		data.UserID = uid
 		data.Username = username
+		data.Shared = false
 		data.Star = 0
 		data.View = 0
+		data.Recommend = 0
 	} else {
 		src, err := GetTopologyByID(data.ID.Hex(), uid)
 		if err == nil {
 			data.Star = src.Star
 			data.View = src.View
+			data.Recommend = src.Recommend
 		}
 	}
 
