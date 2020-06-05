@@ -1,7 +1,6 @@
 package tool
 
 import (
-	"errors"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -9,7 +8,6 @@ import (
 
 	"topology/config"
 	"topology/db/mongo"
-	"topology/keys"
 )
 
 // SelectFileds 要查询的字段
@@ -48,14 +46,33 @@ func Save(data *Tool, uid, username string, isOperate bool) (err error) {
 	data.EditorID = uid
 	data.EditorName = username
 
+	where := bson.M{}
+
 	if data.ID == "" {
 		data.ID = bson.NewObjectId()
 		data.CreatedAt = data.UpdatedAt
 		data.EditorID = uid
 		data.EditorName = username
-	}
 
-	where := bson.M{"_id": data.ID}
+		if data.Fullname != "" && data.DrawFn != "" {
+			t := new(Tool)
+			err := mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).Find(
+				bson.M{"fullname": data.Fullname}).Select(bson.M{"_id": true}).One(&t)
+
+			if err == nil {
+				data.ID = t.ID
+			}
+
+			where["state"] = bson.M{
+				"$lt": 1,
+			}
+
+			where["fullname"] = data.Fullname
+			where["_id"] = data.ID
+		}
+	} else {
+		where["_id"] = data.ID
+	}
 
 	if isOperate {
 		data.EditorName = "system"
@@ -74,37 +91,42 @@ func Save(data *Tool, uid, username string, isOperate bool) (err error) {
 	return
 }
 
-// Del 删除数据
-func Del(id, uid, username string, isOperate bool) (err error) {
-	if !bson.IsObjectIdHex(id) {
-		err = errors.New(keys.ErrorID)
-		return
-	}
-
+// Updates 保存，新增或修改
+func Updates(ids []bson.ObjectId, data *bson.M, uid, username string) (err error) {
 	mongoSession := mongo.Session.Clone()
 	defer mongoSession.Close()
 
-	data := bson.M{
-		"editorId":   uid,
-		"editorName": username,
-		"deletedAt":  time.Now().UTC(),
-	}
-	where := bson.M{"_id": bson.ObjectIdHex(id)}
-
-	if isOperate {
-		data["editorName"] = "system"
-	} else {
-		where["editorId"] = uid
-		where["editorName"] = bson.M{"$ne": "system"}
-	}
-
-	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).
-		Update(where, bson.M{
-			"$set": data,
-		})
+	_, err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).
+		UpdateAll(bson.M{"_id": bson.M{"$in": ids}}, data)
 
 	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "Tool.Del").Msgf("Fail to write mongo:  id=%s, uid=%s", id, uid)
+		log.Error().Caller().Err(err).Str("func", "Tool.Updates").Msgf("Fail to write mongo: ids=%v, data=%v", ids, data)
+	}
+
+	return
+}
+
+// Del 删除数据
+func Del(ids []bson.ObjectId, uid, username string) (err error) {
+	mongoSession := mongo.Session.Clone()
+	defer mongoSession.Close()
+
+	where := bson.M{
+		"$and": []bson.M{
+			bson.M{"_id": bson.M{"$in": ids}},
+			bson.M{
+				"$or": []bson.M{
+					bson.M{"state": bson.M{"$lt": 1}},
+					bson.M{"state": bson.M{"$exists": false}},
+				},
+			},
+		},
+	}
+
+	_, err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).RemoveAll(where)
+
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "Tool.Del").Msgf("Fail to write mongo:  ids=%s, uid=%s", ids, uid)
 	}
 
 	return

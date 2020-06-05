@@ -10,16 +10,20 @@ import (
 type Tool struct {
 	ID bson.ObjectId `json:"id" bson:"_id"`
 
-	Name  string `json:"name"`
-	Icon  string `json:"icon"`
-	Image string `json:"image,omitempty"  bson:"image,omitempty"`
-	Data  bson.M `json:"data"`
+	Name      string `json:"name"`
+	Fullname  string `json:"fullname,omitempty" bson:"fullname,omitempty"`
+	Icon      string `json:"icon"`
+	Image     string `json:"image,omitempty" bson:"image,omitempty"`
+	SVG       string `json:"svg,omitempty" bson:"svg,omitempty"`
+	DrawFn    string `json:"drawFn,omitempty" bson:"drawFn,omitempty"`
+	AnchorsFn string `json:"anchorsFn,omitempty" bson:"anchorsFn,omitempty"`
+	Data      bson.M `json:"data"`
 
 	Class string `json:"class"`
 	Sort  string `json:"sort"`
 
 	Raw      bool   `json:"raw"`
-	Shared   bool   `json:"shared"`
+	State    int    `json:"state"`
 	UserID   string `json:"userId"  bson:"userId"`
 	UserName string `json:"userName"  bson:"userName"`
 

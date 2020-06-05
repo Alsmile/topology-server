@@ -22,5 +22,7 @@ func Route(route *iris.Application) {
 	routeOperate.Get("/tools", ToolGet)
 	routeOperate.Post("/tool", ToolAdd)
 	routeOperate.Put("/tool", ToolSave)
-	routeOperate.Delete("/tool/:id", ToolDel)
+	routeOperate.Post("/tools", ToolsAdd)
+	routeOperate.Put("/tools", ToolsSave)
+	routeOperate.Post("/tool/del", ToolDel)
 }
