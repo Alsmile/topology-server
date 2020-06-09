@@ -131,3 +131,19 @@ func Del(ids []bson.ObjectId, uid, username string) (err error) {
 
 	return
 }
+
+// Count 统计
+func Count(group string, where *bson.M) (count []bson.M, err error) {
+	mongoSession := mongo.Session.Clone()
+	defer mongoSession.Close()
+
+	err = mongoSession.DB(config.App.Mongo.Database).C(mongo.Tool).Pipe([]bson.M{
+		bson.M{"$match": where},
+		bson.M{"$group": bson.M{
+			"_id":   "$" + group,
+			"count": bson.M{"$sum": 1},
+		}},
+	}).All(&count)
+
+	return
+}

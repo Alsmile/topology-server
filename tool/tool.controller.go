@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"strings"
 	"topology/keys"
 
 	"github.com/kataras/iris/v12"
@@ -10,17 +11,77 @@ import (
 // ToolGet 获取用户工具图标列表
 func ToolGet(ctx iris.Context) {
 	isOperate := ctx.Values().GetBoolDefault("operate", false)
-	params := bson.M{"state": 1}
+	params := bson.M{}
 	if isOperate {
-		params = bson.M{}
+		andParams := []bson.M{}
+		c := ctx.URLParam("c")
+		if c != "" {
+			andParams = append(andParams, bson.M{"class": c})
+		}
+
+		orParams := []bson.M{}
+		statesText := ctx.URLParam("states")
+		if statesText != "" {
+			states := strings.Split(statesText, ",")
+			for _, v := range states {
+				if v == "1" {
+					orParams = append(orParams, bson.M{"state": 1})
+				}
+				if v == "-1" {
+					orParams = append(orParams, bson.M{"state": -1})
+				}
+				if v == "0" {
+					orParams = append(orParams, bson.M{"state": 0})
+					orParams = append(orParams, bson.M{"state": bson.M{"$exists": false}})
+				}
+			}
+
+			andParams = append(andParams, bson.M{"$or": orParams})
+		}
+
+		params["$and"] = andParams
+
+	} else {
+		params["state"] = 1
+
+		min := ctx.URLParam("min")
+		if min != "" {
+			params["base"] = true
+		}
+
+		c := ctx.URLParam("c")
+		if c != "" {
+			params["class"] = c
+		}
 	}
 
-	min := ctx.URLParam("min")
-	if min != "" {
-		params["base"] = true
+	pageIndex, err := ctx.URLParamInt(keys.PageIndex)
+	if err != nil {
+		pageIndex = 1
+	}
+	pageCount, err := ctx.URLParamInt(keys.PageCount)
+	if err != nil {
+		pageCount = 100
 	}
 
-	data, _, err := List(&params, 0, 0, false)
+	data, _, err := List(&params, pageIndex, pageCount, false)
+	if err != nil {
+		ctx.JSON(bson.M{
+			"error":       keys.ErrorRead,
+			"errorDetail": err.Error(),
+		})
+		return
+	}
+	if data == nil {
+		ctx.JSON([]bson.M{})
+		return
+	}
+	ctx.JSON(data)
+}
+
+// ToolCount 分类统计个数
+func ToolCount(ctx iris.Context) {
+	data, err := Count("class", &bson.M{"state": 1})
 	if err != nil {
 		ctx.JSON(bson.M{
 			"error":       keys.ErrorRead,

@@ -9,6 +9,7 @@ import (
 // Route file模块路由
 func Route(route *iris.Application) {
 	route.Get("/api/tools", ToolGet)
+	route.Get("/api/tools/count", ToolCount)
 
 	routeUser := route.Party("/api/user", middlewares.Auth)
 	routeUser.Post("/tool", ToolAdd)
