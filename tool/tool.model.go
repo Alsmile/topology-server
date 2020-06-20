@@ -19,8 +19,10 @@ type Tool struct {
 	AnchorsFn string `json:"anchorsFn,omitempty" bson:"anchorsFn,omitempty"`
 	Data      bson.M `json:"data"`
 
-	Class string `json:"class"`
-	Sort  string `json:"sort"`
+	Class        string `json:"class"`
+	SubClassID   string `json:"subClassId,omitempty" bson:"subClassId,omitempty"`
+	SubClassName string `json:"subClassName,omitempty" bson:"subClassName,omitempty"`
+	Sort         string `json:"sort"`
 
 	Raw      bool   `json:"raw"`
 	State    int    `json:"state"`

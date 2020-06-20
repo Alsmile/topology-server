@@ -19,6 +19,11 @@ func ToolGet(ctx iris.Context) {
 			andParams = append(andParams, bson.M{"class": c})
 		}
 
+		subClass := ctx.URLParam("subClass")
+		if subClass != "" {
+			andParams = append(andParams, bson.M{"subClassId": subClass})
+		}
+
 		orParams := []bson.M{}
 		statesText := ctx.URLParam("states")
 		if statesText != "" {
@@ -53,6 +58,11 @@ func ToolGet(ctx iris.Context) {
 		if c != "" {
 			params["class"] = c
 		}
+
+		subClass := ctx.URLParam("subClass")
+		if subClass != "" {
+			params["subClassId"] = subClass
+		}
 	}
 
 	pageIndex, err := ctx.URLParamInt(keys.PageIndex)
@@ -79,9 +89,22 @@ func ToolGet(ctx iris.Context) {
 	ctx.JSON(data)
 }
 
-// ToolCount 分类统计个数
+// GetToolCount 获取分类统计个数
+func GetToolCount(ctx iris.Context) {
+	data, err := GetCount()
+	if err != nil {
+		ctx.JSON(bson.M{
+			"error":       keys.ErrorRead,
+			"errorDetail": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(data)
+}
+
+// ToolCount 分类统计
 func ToolCount(ctx iris.Context) {
-	data, err := Count("class", &bson.M{"state": 1})
+	data, err := Count("subClassId", &bson.M{"state": 1})
 	if err != nil {
 		ctx.JSON(bson.M{
 			"error":       keys.ErrorRead,
@@ -162,9 +185,11 @@ func ToolsSave(ctx iris.Context) {
 	defer ctx.JSON(ret)
 
 	params := struct {
-		IDs   []string
-		State int
-		Class string
+		IDs          []string
+		State        int
+		Class        string
+		SubClassID   string `json:"subClassId,omitempty" bson:"subClassId,omitempty"`
+		SubClassName string `json:"subClassName,omitempty" bson:"subClassName,omitempty"`
 	}{}
 	err := ctx.ReadJSON(&params)
 	if err != nil {
@@ -184,6 +209,14 @@ func ToolsSave(ctx iris.Context) {
 	}
 	if params.Class != "" {
 		data["class"] = params.Class
+	}
+
+	if params.SubClassID != "" {
+		data["subClassId"] = params.SubClassID
+	}
+
+	if params.SubClassName != "" {
+		data["subClassName"] = params.SubClassName
 	}
 
 	err = Updates(objIds, &bson.M{"$set": data}, ctx.Values().GetString("uid"), ctx.Values().GetString("username"))

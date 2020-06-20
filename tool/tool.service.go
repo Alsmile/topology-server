@@ -1,7 +1,12 @@
 package tool
 
 import (
+	"encoding/json"
 	"time"
+
+	"topology/db/redis"
+
+	redigo "github.com/garyburd/redigo/redis"
 
 	"github.com/rs/zerolog/log"
 	"gopkg.in/mgo.v2/bson"
@@ -144,6 +149,37 @@ func Count(group string, where *bson.M) (count []bson.M, err error) {
 			"count": bson.M{"$sum": 1},
 		}},
 	}).All(&count)
+
+	countText, err := json.Marshal(count)
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "Tool.Count").Msgf("Fail to json.Marshal:  err=%v", err)
+	} else {
+		redisConn := redis.Pool.Get()
+		defer redisConn.Close()
+		_, err = redisConn.Do("SET", "topologyToolsCount", countText)
+	}
+
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "Tool.Count").Msgf("Fail to Count:  err=%v", err)
+	}
+
+	return
+}
+
+// GetCount 读取统计
+func GetCount() (count []bson.M, err error) {
+	redisConn := redis.Pool.Get()
+	defer redisConn.Close()
+	countText, err := redigo.String(redisConn.Do("GET", "topologyToolsCount"))
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "Tool.GetCount").Msgf("Fail to get count from redis:  err=%v", err)
+	} else {
+		err = json.Unmarshal([]byte(countText), &count)
+	}
+
+	if err != nil {
+		log.Error().Caller().Err(err).Str("func", "Tool.GetCount").Msgf("Fail to Unmarshal:  err=%v", err)
+	}
 
 	return
 }
