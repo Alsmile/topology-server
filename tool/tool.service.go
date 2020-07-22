@@ -172,7 +172,11 @@ func GetCount() (count []bson.M, err error) {
 	defer redisConn.Close()
 	countText, err := redigo.String(redisConn.Do("GET", "topologyToolsCount"))
 	if err != nil {
-		log.Error().Caller().Err(err).Str("func", "Tool.GetCount").Msgf("Fail to get count from redis:  err=%v", err)
+		Count("subClassId", &bson.M{"state": 1})
+		countText, err = redigo.String(redisConn.Do("GET", "topologyToolsCount"))
+		if err != nil {
+			log.Error().Caller().Err(err).Str("func", "Tool.GetCount").Msgf("Fail to get count from redis:  err=%v", err)
+		}
 	} else {
 		err = json.Unmarshal([]byte(countText), &count)
 	}
