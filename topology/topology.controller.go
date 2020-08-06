@@ -30,7 +30,7 @@ func GetTopology(ctx iris.Context) {
 
 	view := ctx.URLParam("view")
 	if view != "" {
-		View(id)
+		go View(id)
 	}
 	if version == "" {
 		data, err := GetTopologyByID(id, ctx.Values().GetString("uid"))
