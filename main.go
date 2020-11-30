@@ -9,6 +9,7 @@ import (
 	"topology/config"
 	"topology/db"
 	"topology/db/mongo"
+	"topology/db/redis"
 	"topology/router"
 
 	"github.com/rs/zerolog"
@@ -55,6 +56,8 @@ func main() {
 		return
 	}
 	defer mongo.Session.Close()
+
+	defer redis.Pool.Close()
 
 	// 监听路由
 	router.Listen()

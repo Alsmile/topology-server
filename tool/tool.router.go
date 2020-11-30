@@ -10,6 +10,7 @@ import (
 func Route(route *iris.Application) {
 	route.Get("/api/tools", ToolGet)
 	route.Get("/api/tools/count", GetToolCount)
+	route.Get("/api/le5le/operate/tools/count", ToolCount)
 
 	routeUser := route.Party("/api/user", middlewares.Auth)
 	routeUser.Post("/tool", ToolAdd)

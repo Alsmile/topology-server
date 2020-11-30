@@ -4,16 +4,19 @@ go 1.14
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
+	github.com/chasex/redis-go-cluster v1.0.0
 	github.com/dchest/captcha v0.0.0-20170622155422-6a29415a8364
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072 // indirect
 	github.com/garyburd/redigo v1.6.0
 	github.com/go-check/check v1.0.0-20180628173108-788fd7840127 // indirect
+	github.com/gomodule/redigo v1.7.1-0.20190724094224-574c33c3df38
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/mattn/go-colorable v0.1.6 // indirect
+	github.com/mna/redisc v1.1.7
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
